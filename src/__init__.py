@@ -1,13 +1,26 @@
-from typing import List, Tuple
+from typing import List, Tuple, Any
 
 import aqt
 import aqt.sound
 from aqt.qt import *
 from aqt import mw
-from aqt.gui_hooks import reviewer_will_show_context_menu, state_shortcuts_will_change
+from aqt.gui_hooks import (
+    reviewer_will_show_context_menu,
+    state_shortcuts_will_change,
+    webview_will_set_content,
+)
 from aqt.utils import tooltip
+from aqt.webview import WebContent
+from aqt.reviewer import Reviewer
 
 config = mw.addonManager.getConfig(__name__)
+mw.addonManager.setWebExports(__name__, r".*\.js")
+base_path = f"/_addons/{mw.addonManager.addonFromModule(__name__)}"
+
+
+def append_webcontent(webcontent: WebContent, context: Any) -> None:
+    if isinstance(context, Reviewer):
+        webcontent.js.append(f"{base_path}/audio.js")
 
 
 def get_speed() -> float:
@@ -30,14 +43,22 @@ def set_speed(speed: float):
 
 def reset_speed():
     set_speed(1.0)
+    if mw.reviewer:
+        mw.reviewer.web.eval("resetAudioSpeeed();")
 
 
 def speed_up():
-    add_speed(get_speed_factor())
+    factor = get_speed_factor()
+    add_speed(factor)
+    if mw.reviewer:
+        mw.reviewer.web.eval(f"addAudioPlaybackRate({factor});")
 
 
 def slow_down():
-    add_speed(-get_speed_factor())
+    factor = -get_speed_factor()
+    add_speed(factor)
+    if mw.reviewer:
+        mw.reviewer.web.eval(f"addAudioPlaybackRate({factor});")
 
 
 actions = [
@@ -62,3 +83,4 @@ def add_menu_items(reviewer, menu: QMenu):
 
 reviewer_will_show_context_menu.append(add_menu_items)
 state_shortcuts_will_change.append(add_state_shortcuts)
+webview_will_set_content.append(append_webcontent)
