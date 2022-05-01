@@ -14,8 +14,8 @@ from aqt.webview import WebContent
 from aqt.reviewer import Reviewer
 
 config = mw.addonManager.getConfig(__name__)
-mw.addonManager.setWebExports(__name__, r".*\.js")
-base_path = f"/_addons/{mw.addonManager.addonFromModule(__name__)}"
+mw.addonManager.setWebExports(__name__, r"web/.*\.js")
+base_path = f"/_addons/{mw.addonManager.addonFromModule(__name__)}/web"
 
 
 def append_webcontent(webcontent: WebContent, context: Any) -> None:
