@@ -1,9 +1,10 @@
+from dataclasses import dataclass
 import json
-from typing import List, Tuple, Any
+from typing import List, Optional, Tuple, Any
 
 import aqt
 import aqt.sound
-from aqt.sound import AVTag
+from aqt.sound import AVTag, av_player
 
 from aqt.qt import *
 from aqt import mw
@@ -70,10 +71,43 @@ def slow_down():
         mw.reviewer.web.eval(f"addAudioPlaybackRate({factor});")
 
 
+# FIXME: queue can be get 'stuck' in only one side even when the option to include both sides's sounds in the back is enabled
+# we probably need to monkey-patch Reviewer.replayAudio to work around this.
+
+
+def play_next():
+    if av_player._enqueued:
+        av_player.clear_queue_and_maybe_interrupt()
+        # if there are any queued sounds, interrupt the current sound and continue playing the next ones
+        next_tags = sound_tags[current_sound.side][current_sound.index + 1 :]
+        av_player.play_tags(next_tags)
+    else:
+        av_player._stop_if_playing()
+        side = current_sound.side
+        tags = sound_tags[side]
+        idx = (current_sound.index + 1) % len(tags)
+        av_player.play_tags([tags[idx]])
+
+
+def play_previous():
+    if av_player._enqueued:
+        av_player.clear_queue_and_maybe_interrupt()
+        next_tags = sound_tags[current_sound.side][current_sound.index - 1 :]
+        av_player.play_tags(next_tags)
+    else:
+        av_player._stop_if_playing()
+        side = current_sound.side
+        tags = sound_tags[side]
+        idx = (current_sound.index - 1) % len(tags)
+        av_player.play_tags([tags[idx]])
+
+
 actions = [
     ("Speed Up Audio", config["speed_up_shortcut"], speed_up),
     ("Slow Down Audio", config["slow_down_shortcut"], slow_down),
     ("Reset Audio Speed", config["reset_speed_shortcut"], reset_speed),
+    ("Play Next Audio", config["play_next_shortcut"], play_next),
+    ("Play Previous Audio", config["play_previous_shortcut"], play_previous),
 ]
 
 
@@ -91,9 +125,19 @@ def add_menu_items(reviewer, menu: QMenu):
 
 
 sound_tags = {
-    "q": [],
     "a": [],
+    "q": [],
 }
+
+
+@dataclass
+class SoundTagInfo:
+    side: str
+    index: int
+    tag: AVTag
+
+
+current_sound: Optional[SoundTagInfo]
 
 
 def save_question_sound_tags(card: Card, tags: List[AVTag]) -> None:
@@ -106,13 +150,14 @@ def save_answer_sound_tags(card: Card, tags: List[AVTag]) -> None:
     sound_tags["a"] = tags
 
 
-def highlight_playing_tag(player: aqt.sound.Player, tag: AVTag) -> None:
+def on_begin_playing(player: aqt.sound.Player, tag: AVTag) -> None:
     idx = -1
     side = ""
     for key, tags in sound_tags.items():
         try:
             idx = tags.index(tag)
             side = key
+            break
         except ValueError:
             pass
     if not side:
@@ -126,6 +171,9 @@ def highlight_playing_tag(player: aqt.sound.Player, tag: AVTag) -> None:
         )
     )
 
+    global current_sound
+    current_sound = SoundTagInfo(side, idx, tag)
+
 
 def clear_sound_tag_highlight(player: aqt.sound.Player) -> None:
     mw.reviewer.web.eval(
@@ -138,7 +186,7 @@ def clear_sound_tag_highlight(player: aqt.sound.Player) -> None:
 reviewer_will_show_context_menu.append(add_menu_items)
 state_shortcuts_will_change.append(add_state_shortcuts)
 webview_will_set_content.append(append_webcontent)
-av_player_did_begin_playing.append(highlight_playing_tag)
+av_player_did_begin_playing.append(on_begin_playing)
 av_player_did_end_playing.append(clear_sound_tag_highlight)
 reviewer_will_play_question_sounds.append(save_question_sound_tags)
 reviewer_will_play_answer_sounds.append(save_answer_sound_tags)
