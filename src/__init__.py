@@ -1,6 +1,6 @@
 from dataclasses import dataclass
 import json
-from typing import List, Optional, Tuple, Any
+from typing import Dict, List, Optional, Tuple, Any
 
 import aqt
 import aqt.sound
@@ -41,30 +41,30 @@ def get_speed_factor() -> float:
     return float(config.get("speed_factor", 10)) / 100
 
 
-def add_speed(speed: float):
+def add_speed(speed: float) -> None:
     aqt.sound.mpvManager.command("add", "speed", speed)
     tooltip(f"Audio Speed {speed:+}<br>Current Speed: {get_speed()}")
 
 
-def set_speed(speed: float):
+def set_speed(speed: float) -> None:
     aqt.sound.mpvManager.command("set_property", "speed", speed)
     tooltip(f"Reset Speed: {get_speed()}")
 
 
-def reset_speed():
+def reset_speed() -> None:
     set_speed(1.0)
     if mw.reviewer:
         mw.reviewer.web.eval("resetAudioSpeeed();")
 
 
-def speed_up():
+def speed_up() -> None:
     factor = get_speed_factor()
     add_speed(factor)
     if mw.reviewer:
         mw.reviewer.web.eval(f"addAudioPlaybackRate({factor});")
 
 
-def slow_down():
+def slow_down() -> None:
     factor = -get_speed_factor()
     add_speed(factor)
     if mw.reviewer:
@@ -75,31 +75,26 @@ def slow_down():
 # we probably need to monkey-patch Reviewer.replayAudio to work around this.
 
 
-def play_next():
+def play_n(i: int) -> None:
     if av_player._enqueued:
         av_player.clear_queue_and_maybe_interrupt()
         # if there are any queued sounds, interrupt the current sound and continue playing the next ones
-        next_tags = sound_tags[current_sound.side][current_sound.index + 1 :]
+        next_tags = sound_tags[current_sound.side][current_sound.index + i :]
         av_player.play_tags(next_tags)
     else:
         av_player._stop_if_playing()
         side = current_sound.side
         tags = sound_tags[side]
-        idx = (current_sound.index + 1) % len(tags)
+        idx = (current_sound.index + i) % len(tags)
         av_player.play_tags([tags[idx]])
 
 
-def play_previous():
-    if av_player._enqueued:
-        av_player.clear_queue_and_maybe_interrupt()
-        next_tags = sound_tags[current_sound.side][current_sound.index - 1 :]
-        av_player.play_tags(next_tags)
-    else:
-        av_player._stop_if_playing()
-        side = current_sound.side
-        tags = sound_tags[side]
-        idx = (current_sound.index - 1) % len(tags)
-        av_player.play_tags([tags[idx]])
+def play_next() -> None:
+    play_n(1)
+
+
+def play_previous() -> None:
+    play_n(-1)
 
 
 actions = [
@@ -117,14 +112,14 @@ def add_state_shortcuts(state: str, shortcuts: List[Tuple[str, Callable]]) -> No
             shortcuts.append((shortcut, cb))
 
 
-def add_menu_items(reviewer, menu: QMenu):
+def add_menu_items(reviewer: Reviewer, menu: QMenu) -> None:
     for (label, shortcut, cb) in actions:
         action = menu.addAction(label)
         action.setShortcut(shortcut)
         qconnect(action.triggered, cb)
 
 
-sound_tags = {
+sound_tags: Dict[str, List[AVTag]] = {
     "a": [],
     "q": [],
 }

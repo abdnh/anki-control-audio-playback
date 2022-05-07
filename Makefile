@@ -1,4 +1,4 @@
-.PHONY: all zip clean format mypy install
+.PHONY: all zip clean fix mypy install
 all: zip
 
 PACKAGE_NAME := control_playback
@@ -19,11 +19,15 @@ ankiprofile/addons21/$(PACKAGE_NAME): $(SRC)
 
 install: ankiprofile/addons21/$(PACKAGE_NAME)
 
-format:
-	python -m black src/
+fix:
+	python -m black src
+	python -m isort src
 
 mypy:
-	python -m mypy src/
+	python -m mypy src --disallow-untyped-defs
+
+pylint:
+	python -m pylint src
 
 clean:
 	rm -f $(PACKAGE_NAME).ankiaddon
