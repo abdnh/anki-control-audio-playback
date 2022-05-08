@@ -217,11 +217,10 @@ class PlaybackController:
             )
 
         text = SOUND_REF_RE.sub(repl_sounds, text)
-        added.reverse()
         self.extra_tags.get_side(side).extend(added)
         if play:
-            for tag in added:
-                av_player.insert_file(tag.filename)
+            av_player._enqueued.extend(added)
+            av_player._play_next_if_idle()
         return text, added
 
     def apply_to_card_avtags(self, card: Card):
