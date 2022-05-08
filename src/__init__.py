@@ -1,11 +1,11 @@
 from typing import Any, List, Tuple
 
 from aqt import mw
-from aqt.gui_hooks import (
-    reviewer_will_show_context_menu,
-    state_shortcuts_will_change,
-    webview_will_set_content,
-)
+from aqt.browser.previewer import Previewer
+from aqt.clayout import CardLayout
+from aqt.gui_hooks import (reviewer_will_show_context_menu,
+                           state_shortcuts_will_change,
+                           webview_will_set_content)
 from aqt.qt import *
 from aqt.reviewer import Reviewer
 from aqt.webview import WebContent
@@ -20,7 +20,7 @@ base_path = f"/_addons/{mw.addonManager.addonFromModule(__name__)}/web"
 
 
 def append_webcontent(webcontent: WebContent, context: Any) -> None:
-    if isinstance(context, Reviewer):
+    if isinstance(context, (Reviewer, Previewer, CardLayout)):
         webcontent.js.append(f"{base_path}/audio.js")
 
 

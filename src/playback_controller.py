@@ -8,16 +8,28 @@ import aqt.sound
 from anki.cards import Card
 from anki.sound import AVTag, SoundOrVideoTag
 from aqt import mw
-from aqt.gui_hooks import (
-    av_player_did_begin_playing,
-    av_player_did_end_playing,
-    reviewer_will_play_answer_sounds,
-    reviewer_will_play_question_sounds,
-    webview_did_receive_js_message,
-)
+from aqt.browser.previewer import Previewer
+from aqt.clayout import CardLayout
+from aqt.gui_hooks import (av_player_did_begin_playing,
+                           av_player_did_end_playing,
+                           reviewer_will_play_answer_sounds,
+                           reviewer_will_play_question_sounds,
+                           webview_did_receive_js_message)
 from aqt.qt import *
+from aqt.qt import QApplication
 from aqt.sound import AVTag, av_player
 from aqt.utils import tooltip
+from aqt.webview import AnkiWebView
+
+
+def get_active_webview() -> AnkiWebView:
+    dialog = QApplication.activeModalWidget()
+    if isinstance(dialog, CardLayout):
+        return dialog.preview_web
+    window = QApplication.activeWindow()
+    if isinstance(window, Previewer):
+        return window._web  # pylint: disable=protected-access
+    return mw.reviewer.web
 
 
 @dataclass
@@ -74,18 +86,17 @@ class PlaybackController:
 
     def reset_speed(self) -> None:
         self.set_speed(1.0)
-        mw.reviewer.web.eval("resetAudioSpeeed();")
+        get_active_webview().eval("resetAudioSpeeed();")
 
     def speed_up(self) -> None:
         factor = self.get_speed_factor()
         self.add_speed(factor)
-        mw.reviewer.web.eval(f"addAudioPlaybackRate({factor});")
+        get_active_webview().eval(f"addAudioPlaybackRate({factor});")
 
     def slow_down(self) -> None:
         factor = -self.get_speed_factor()
         self.add_speed(factor)
-        if mw.reviewer:
-            mw.reviewer.web.eval(f"addAudioPlaybackRate({factor});")
+        get_active_webview().eval(f"addAudioPlaybackRate({factor});")
 
     def save_question_sound_tags(self, card: Card, tags: List[AVTag]) -> None:
         self.sound_tags.qtags = tags.copy()
@@ -111,8 +122,8 @@ class PlaybackController:
                 pass
         if not side:
             return
-
-        mw.reviewer.web.eval(
+        print(f"on_began_playing: {side=} {idx=}")
+        get_active_webview().eval(
             "setTimeout(() => setPlayButtonHighlight({}, {}, {}), 100);".format(
                 json.dumps(side),
                 json.dumps(idx),
@@ -122,7 +133,7 @@ class PlaybackController:
         self.current_sound = SoundTagInfo(side, idx, tag)
 
     def clear_sound_tag_highlight(self, player: aqt.sound.Player) -> None:
-        mw.reviewer.web.eval(
+        get_active_webview().eval(
             """
             setTimeout(clearPlayButtonsHighlight, 100);
             """
