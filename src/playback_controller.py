@@ -154,8 +154,9 @@ class PlaybackController:
             av_player._stop_if_playing()
             side = self.current_sound.side
             tags = self.sound_tags.get_side(side) + self.extra_tags.get_side(side)
-            idx = (self.current_sound.index + i) % len(tags)
-            av_player.play_tags([tags[idx]])
+            if tags:
+                idx = (self.current_sound.index + i) % len(tags)
+                av_player.play_tags([tags[idx]])
 
     def play_next(self) -> None:
         self.play_n(1)
