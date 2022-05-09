@@ -101,11 +101,11 @@ class PlaybackController:
         get_active_webview().eval(f"addAudioPlaybackRate({factor});")
 
     def save_question_sound_tags(self, card: Card, tags: List[AVTag]) -> None:
-        self.sound_tags.qtags = tags.copy()
+        self.sound_tags.qtags = card.question_av_tags().copy()
         self.extra_tags.qtags = []
 
     def save_answer_sound_tags(self, card: Card, tags: List[AVTag]) -> None:
-        self.sound_tags.atags = tags.copy()
+        self.sound_tags.atags = card.answer_av_tags().copy()
         self.extra_tags.atags = []
 
     def on_began_playing(self, player: aqt.sound.Player, tag: AVTag) -> None:
