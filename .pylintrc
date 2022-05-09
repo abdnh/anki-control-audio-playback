@@ -1,0 +1,17 @@
+[MASTER]
+extension-pkg-whitelist=PyQt6,PyQt5
+
+[REPORTS]
+output-format=colorized
+
+[MESSAGES CONTROL]
+disable=
+  line-too-long,
+  missing-function-docstring,
+  missing-module-docstring,
+  missing-class-docstring,
+  unused-argument,
+  wildcard-import,
+  unused-wildcard-import,
+  too-few-public-methods,
+  no-self-use,

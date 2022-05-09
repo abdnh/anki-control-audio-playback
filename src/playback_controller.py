@@ -10,14 +10,16 @@ from anki.sound import AVTag, SoundOrVideoTag
 from aqt import mw
 from aqt.browser.previewer import Previewer
 from aqt.clayout import CardLayout
-from aqt.gui_hooks import (av_player_did_begin_playing,
-                           av_player_did_end_playing,
-                           reviewer_will_play_answer_sounds,
-                           reviewer_will_play_question_sounds,
-                           webview_did_receive_js_message)
+from aqt.gui_hooks import (
+    av_player_did_begin_playing,
+    av_player_did_end_playing,
+    reviewer_will_play_answer_sounds,
+    reviewer_will_play_question_sounds,
+    webview_did_receive_js_message,
+)
 from aqt.qt import *
 from aqt.qt import QApplication
-from aqt.sound import AVTag, av_player
+from aqt.sound import av_player
 from aqt.utils import tooltip
 from aqt.webview import AnkiWebView
 
@@ -57,10 +59,10 @@ class SoundTagList:
     def get_side(self, side: str) -> List[AVTag]:
         if side == "q":
             return self.qtags
-        else:
-            return self.atags
+        return self.atags
 
 
+# FIXME: avoid using protected members of av_player - require extending the AVPlayer interface in Anki
 class PlaybackController:
     def __init__(self, config: Dict):
         self.config = config
@@ -223,30 +225,18 @@ class PlaybackController:
             av_player._play_next_if_idle()
         return text, added
 
-    def apply_to_card_avtags(self, card: Card):
-        t = card.question_av_tags()
-        t.clear()
-        t.extend(self.sound_tags.qtags + self.extra_tags.qtags)
-        t = card.answer_av_tags()
-        t.clear()
-        t.extend(self.sound_tags.atags + self.extra_tags.atags)
+    def apply_to_card_avtags(self, card: Card) -> None:
+        tags = card.question_av_tags()
+        tags.clear()
+        tags.extend(self.sound_tags.qtags + self.extra_tags.qtags)
+        tags = card.answer_av_tags()
+        tags.clear()
+        tags.extend(self.sound_tags.atags + self.extra_tags.atags)
 
     def init_hooks(self) -> None:
-        av_player_did_begin_playing.append(
-            lambda player, tag: self.on_began_playing(player, tag)
-        )
-        av_player_did_end_playing.append(
-            lambda player: self.clear_sound_tag_highlight(player)
-        )
-        reviewer_will_play_question_sounds.append(
-            lambda card, tags: self.save_question_sound_tags(card, tags)
-        )
-        reviewer_will_play_answer_sounds.append(
-            lambda card, tags: self.save_answer_sound_tags(card, tags)
-        )
-        # state_shortcuts_will_change.append(
-        #     lambda state, shortcuts: self.modify_replay(state, shortcuts)
-        # )
-        webview_did_receive_js_message.append(
-            lambda handled, msg, context: self.handle_js_msg(handled, msg, context)
-        )
+        av_player_did_begin_playing.append(self.on_began_playing)
+        av_player_did_end_playing.append(self.clear_sound_tag_highlight)
+        reviewer_will_play_question_sounds.append(self.save_question_sound_tags)
+        reviewer_will_play_answer_sounds.append(self.save_answer_sound_tags)
+        # state_shortcuts_will_change.append(self.modify_replay)
+        webview_did_receive_js_message.append(self.handle_js_msg)

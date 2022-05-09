@@ -3,9 +3,11 @@ from typing import Any, List, Tuple
 from aqt import mw
 from aqt.browser.previewer import Previewer
 from aqt.clayout import CardLayout
-from aqt.gui_hooks import (reviewer_will_show_context_menu,
-                           state_shortcuts_will_change,
-                           webview_will_set_content)
+from aqt.gui_hooks import (
+    reviewer_will_show_context_menu,
+    state_shortcuts_will_change,
+    webview_will_set_content,
+)
 from aqt.qt import *
 from aqt.reviewer import Reviewer
 from aqt.webview import WebContent

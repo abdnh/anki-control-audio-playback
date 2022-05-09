@@ -24,7 +24,7 @@ fix:
 	python -m isort src
 
 mypy:
-	python -m mypy src --disallow-untyped-defs
+	python -m mypy src
 
 pylint:
 	python -m pylint src
