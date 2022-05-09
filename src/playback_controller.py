@@ -144,7 +144,6 @@ class PlaybackController:
 
     def play_n(self, i: int) -> None:
         if av_player._enqueued:
-            av_player.clear_queue_and_maybe_interrupt()
             # if there are any queued sounds, interrupt the current sound and continue playing the next ones
             side = self.current_sound.side
             tags = self.sound_tags.get_side(side) + self.extra_tags.get_side(side)
