@@ -124,7 +124,6 @@ class PlaybackController:
                 pass
         if not side:
             return
-        print(f"on_began_playing: {side=} {idx=}")
         get_active_webview().eval(
             "setTimeout(() => setPlayButtonHighlight({}, {}, {}), 100);".format(
                 json.dumps(side),
@@ -164,34 +163,6 @@ class PlaybackController:
 
     def play_previous(self) -> None:
         self.play_n(-1)
-
-    # def replay_audios(self) -> None:
-    #     reviewer = mw.reviewer
-    #     card = reviewer.card
-    #     if mw.reviewer.state == "question":
-    #         tags = card.question_av_tags()
-    #         self.sound_tags.qtags = tags
-    #         tags += self.extra_tags.qtags
-    #     else:
-    #         extra_tags = []
-    #         def_tags = []
-    #         if card.replay_question_audio_on_answer_side():
-    #             def_tags += card.question_av_tags()
-    #             extra_tags += self.extra_tags.qtags
-    #         def_tags += self.extra_tags.atags
-    #         extra_tags += self.extra_tags.atags
-    #         self.sound_tags.atags = def_tags
-    #         tags = extra_tags + def_tags
-    #     print(f"replay_audios: {tags=}")
-    #     av_player.play_tags(tags)
-    #     # reviewer.replayAudio()
-
-    # def modify_replay(self, state: str, shortcuts: List[Tuple[str, Callable]]) -> None:
-    #     if state == "review":
-    #         # modify the 'r' shortcut to give us replayed audios
-    #         for i, shortcut in enumerate(shortcuts):
-    #             if shortcut[0] == "r":
-    #                 shortcuts[i] = (shortcut[0], lambda: self.replay_audios())
 
     def handle_js_msg(
         self, handled: Tuple[bool, Any], message: str, context: Any
@@ -238,5 +209,4 @@ class PlaybackController:
         av_player_did_end_playing.append(self.clear_sound_tag_highlight)
         reviewer_will_play_question_sounds.append(self.save_question_sound_tags)
         reviewer_will_play_answer_sounds.append(self.save_answer_sound_tags)
-        # state_shortcuts_will_change.append(self.modify_replay)
         webview_did_receive_js_message.append(self.handle_js_msg)
