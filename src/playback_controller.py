@@ -17,7 +17,7 @@ from aqt.gui_hooks import (
     reviewer_will_play_question_sounds,
     webview_did_receive_js_message,
 )
-from aqt.qt import *
+
 from aqt.qt import QApplication
 from aqt.sound import av_player
 from aqt.utils import tooltip
@@ -181,7 +181,7 @@ class PlaybackController:
         tags = self.sound_tags.get_side(side) + self.extra_tags.get_side(side)
         added: List[AVTag] = []
 
-        def repl_sounds(match: Match) -> str:
+        def replace_sounds(match: Match) -> str:
             filename = match.group(1)
             tag = SoundOrVideoTag(filename=filename)
             added.append(tag)
@@ -189,7 +189,7 @@ class PlaybackController:
                 cmd="play", idx=len(tags) + len(added) - 1, side=side
             )
 
-        text = SOUND_REF_RE.sub(repl_sounds, text)
+        text = SOUND_REF_RE.sub(replace_sounds, text)
         self.extra_tags.get_side(side).extend(added)
         if play:
             av_player._enqueued.extend(added)

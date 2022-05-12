@@ -45,15 +45,15 @@ actions = [
 
 def add_state_shortcuts(state: str, shortcuts: List[Tuple[str, Callable]]) -> None:
     if state == "review":
-        for (label, shortcut, cb) in actions:
-            shortcuts.append((shortcut, cb))
+        for (_, shortcut, func) in actions:
+            shortcuts.append((shortcut, func))
 
 
 def add_menu_items(reviewer: Reviewer, menu: QMenu) -> None:
-    for (label, shortcut, cb) in actions:
+    for (label, shortcut, func) in actions:
         action = menu.addAction(label)
         action.setShortcut(shortcut)
-        qconnect(action.triggered, cb)
+        qconnect(action.triggered, func)
 
 
 playback_controller.init_hooks()
