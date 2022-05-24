@@ -4,6 +4,6 @@
     "reset_speed_shortcut": "\\",
     "speed_factor": "10",
     "play_button_highlight_color": "red",
-    "play_previous_shortcut": "X",
-    "play_next_shortcut": "C"
+    "play_previous_shortcut": "x",
+    "play_next_shortcut": "c"
 }
