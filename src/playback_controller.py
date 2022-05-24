@@ -1,7 +1,7 @@
 import json
 import re
 from dataclasses import dataclass
-from typing import Any, Dict, List, Match, Optional, Tuple
+from typing import Any, Dict, List, Match, Optional, Tuple, Union
 
 import aqt
 import aqt.sound
@@ -17,21 +17,32 @@ from aqt.gui_hooks import (
     reviewer_will_play_question_sounds,
     webview_did_receive_js_message,
 )
-
 from aqt.qt import QApplication
 from aqt.sound import av_player
 from aqt.utils import tooltip
 from aqt.webview import AnkiWebView
 
 
-def get_active_webview() -> AnkiWebView:
+class DummyWebview:
+    """A dummy webview to use when the webview of the focused window is not available (e.g. eval() was called when the window is being destroyed)"""
+
+    def eval(self, _: str) -> None:
+        pass
+
+
+def get_active_webview() -> Union[AnkiWebView, DummyWebview]:
     dialog = QApplication.activeModalWidget()
+    web: Optional[Union[AnkiWebView, DummyWebview]] = None
     if isinstance(dialog, CardLayout):
-        return dialog.preview_web
+        web = dialog.preview_web
     window = QApplication.activeWindow()
     if isinstance(window, Previewer):
-        return window._web  # pylint: disable=protected-access
-    return mw.reviewer.web
+        web = window._web  # pylint: disable=protected-access
+    else:
+        web = mw.reviewer.web
+    if not web:
+        web = DummyWebview()
+    return web
 
 
 @dataclass
