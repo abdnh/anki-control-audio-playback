@@ -9,3 +9,7 @@ There are several add-ons on AnkiWeb that do the same, but it appears that none 
 This only works with the mpv media player (which Anki uses by default on all platforms).
 
 You can download the add-on from its AnkiWeb page: https://ankiweb.net/shared/info/312734862
+
+## Changelog
+
+See [CHANGELOG.md](CHANGELOG.md) for a list of changes.
