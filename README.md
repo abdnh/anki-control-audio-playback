@@ -1,8 +1,8 @@
-![The add-on's menu items](shot.png)
-
 Anki add-on that adds options to control audio playback speed in the reviewer.
 
 You can configure the shortcuts and the speed change from the add-on config under **Tools > Add-ons**.
+
+![The add-on's menu items](shot.png)
 
 There are several add-ons on AnkiWeb that do the same, but it appears that none of them works on the latest versions of Anki (2.1.49+).
 
