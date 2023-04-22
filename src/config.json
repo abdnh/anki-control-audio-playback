@@ -1,6 +1,6 @@
 {
-    "speed_up_shortcut": "]",
-    "slow_down_shortcut": "[",
     "reset_speed_shortcut": "\\",
-    "speed_factor": "10"
+    "slow_down_shortcut": "[",
+    "speed_factor": "10",
+    "speed_up_shortcut": "]"
 }
