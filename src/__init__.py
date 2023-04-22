@@ -22,6 +22,10 @@ def get_speed() -> float:
     return aqt.sound.mpvManager.command("get_property", "speed")
 
 
+def get_default_speed() -> float:
+    return float(config.get("default_speed", 1.0))
+
+
 def get_speed_factor() -> float:
     return float(config.get("speed_factor", 10)) / 100
 
@@ -33,11 +37,11 @@ def add_speed(speed: float) -> None:
 
 def set_speed(speed: float) -> None:
     aqt.sound.mpvManager.command("set_property", "speed", speed)
-    tooltip(f"Reset Speed: {get_speed()}")
 
 
 def reset_speed() -> None:
-    set_speed(1.0)
+    set_speed(get_default_speed())
+    tooltip(f"Reset Speed: {get_speed()}")
     if mw.reviewer:
         mw.reviewer.web.eval("resetAudioSpeeed();")
 
@@ -81,6 +85,7 @@ def on_profile_did_open() -> None:
         gui_hooks.reviewer_will_show_context_menu.append(add_menu_items)
         gui_hooks.state_shortcuts_will_change.append(add_state_shortcuts)
         gui_hooks.webview_will_set_content.append(append_webcontent)
+        set_speed(get_default_speed())
     else:
         showWarning(
             "This add-on only works with the mpv media player.",

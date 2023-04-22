@@ -1,1 +1,2 @@
-**speed_factor**: how to much to increase/decrease speed. "10" means increase/decrease by 10% of the normal speed.
+-   `default_speed`: default speed to set.
+-   `speed_factor`: how to much to increase/decrease speed. "10" means increase/decrease by 10% of the normal speed.
