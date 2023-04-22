@@ -1,29 +1,22 @@
-.PHONY: all zip clean format mypy install
-all: zip
+.PHONY: all zip ankiweb fix mypy pylint clean
 
-PACKAGE_NAME := control_playback
+all: zip ankiweb
 
-zip: $(PACKAGE_NAME).ankiaddon
+zip:
+	python -m ankiscripts.build --type package --qt all --exclude user_files/**/
 
-SRC := $(wildcard src/**)
+ankiweb:
+	python -m ankiscripts.build --type ankiweb --qt all --exclude user_files/**/
 
-$(PACKAGE_NAME).ankiaddon: $(SRC)
-	rm -f $@
-	rm -rf src/__pycache__
-	( cd src/; zip -r ../$@ * )
-
-# Install in test profile
-ankiprofile/addons21/$(PACKAGE_NAME): $(SRC)
-	rm -rf src/__pycache__
-	cp -r src/. ankiprofile/addons21/$(PACKAGE_NAME)
-
-install: ankiprofile/addons21/$(PACKAGE_NAME)
-
-format:
-	python -m black src/
+fix:
+	python -m black src tests --exclude="forms|vendor"
+	python -m isort src tests
 
 mypy:
-	python -m mypy src/
+	python -m mypy src tests
+
+pylint:
+	python -m pylint src tests
 
 clean:
-	rm -f $(PACKAGE_NAME).ankiaddon
+	rm -rf build/

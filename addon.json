@@ -1,0 +1,7 @@
+{
+    "name": "Audio Playback Controls",
+    "package": "control_playback",
+    "homepage": "https://github.com/abdnh/anki-control-audio-playback/",
+    "ankiweb_id": "312734862",
+    "min_point_version": 28
+}

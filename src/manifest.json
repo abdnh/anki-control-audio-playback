@@ -1,4 +1,1 @@
-{
-    "name": "Audio Playback Controls",
-    "package": "control_playback"
-}
+{"name": "Audio Playback Controls", "homepage": "https://github.com/abdnh/anki-control-audio-playback/", "package": "312734862", "conflicts": ["control_playback"], "mod": 1682202061, "min_point_version": 28}

@@ -1,0 +1,6 @@
+aqt
+mypy
+pylint
+black
+isort
+ankiscripts[qt5,qt6] @ git+https://github.com/abdnh/ankiscripts@6e2273c3499857f288338e65d13e5069e6a70b32

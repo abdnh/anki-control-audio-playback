@@ -1,4 +1,0 @@
-anki
-aqt
-mypy
-black
