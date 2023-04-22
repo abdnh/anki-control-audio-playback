@@ -26,30 +26,30 @@ def get_speed_factor() -> float:
     return float(config.get("speed_factor", 10)) / 100
 
 
-def add_speed(speed: float):
+def add_speed(speed: float) -> None:
     aqt.sound.mpvManager.command("add", "speed", speed)
     tooltip(f"Audio Speed {speed:+}<br>Current Speed: {get_speed()}")
 
 
-def set_speed(speed: float):
+def set_speed(speed: float) -> None:
     aqt.sound.mpvManager.command("set_property", "speed", speed)
     tooltip(f"Reset Speed: {get_speed()}")
 
 
-def reset_speed():
+def reset_speed() -> None:
     set_speed(1.0)
     if mw.reviewer:
         mw.reviewer.web.eval("resetAudioSpeeed();")
 
 
-def speed_up():
+def speed_up() -> None:
     factor = get_speed_factor()
     add_speed(factor)
     if mw.reviewer:
         mw.reviewer.web.eval(f"addAudioPlaybackRate({factor});")
 
 
-def slow_down():
+def slow_down() -> None:
     factor = -get_speed_factor()
     add_speed(factor)
     if mw.reviewer:
@@ -65,12 +65,12 @@ actions = [
 
 def add_state_shortcuts(state: str, shortcuts: List[Tuple[str, Callable]]) -> None:
     if state == "review":
-        for (label, shortcut, cb) in actions:
+        for label, shortcut, cb in actions:
             shortcuts.append((shortcut, cb))
 
 
-def add_menu_items(reviewer, menu: QMenu):
-    for (label, shortcut, cb) in actions:
+def add_menu_items(reviewer: Reviewer, menu: QMenu) -> None:
+    for label, shortcut, cb in actions:
         action = menu.addAction(label)
         action.setShortcut(shortcut)
         qconnect(action.triggered, cb)
