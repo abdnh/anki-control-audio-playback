@@ -1,17 +1,12 @@
-from typing import List, Tuple, Any
+from typing import Any, List, Tuple
 
 import aqt
 import aqt.sound
+from aqt import gui_hooks, mw
 from aqt.qt import *
-from aqt import mw
-from aqt.gui_hooks import (
-    reviewer_will_show_context_menu,
-    state_shortcuts_will_change,
-    webview_will_set_content,
-)
-from aqt.utils import tooltip
-from aqt.webview import WebContent
 from aqt.reviewer import Reviewer
+from aqt.utils import showWarning, tooltip
+from aqt.webview import WebContent
 
 config = mw.addonManager.getConfig(__name__)
 mw.addonManager.setWebExports(__name__, r"web/.*\.js")
@@ -81,6 +76,16 @@ def add_menu_items(reviewer, menu: QMenu):
         qconnect(action.triggered, cb)
 
 
-reviewer_will_show_context_menu.append(add_menu_items)
-state_shortcuts_will_change.append(add_state_shortcuts)
-webview_will_set_content.append(append_webcontent)
+def on_profile_did_open() -> None:
+    if aqt.sound.mpvManager:
+        gui_hooks.reviewer_will_show_context_menu.append(add_menu_items)
+        gui_hooks.state_shortcuts_will_change.append(add_state_shortcuts)
+        gui_hooks.webview_will_set_content.append(append_webcontent)
+    else:
+        showWarning(
+            "This add-on only works with the mpv media player.",
+            title="Audio Playback Controls",
+        )
+
+
+gui_hooks.profile_did_open.append(on_profile_did_open)
